@@ -22,6 +22,18 @@ func (s *AdapterTestSuite) assertPolicy(expected, res [][]string) {
 	s.Assert().True(util.Array2DEquals(expected, res), "Policy Got: %v, supposed to be %v", res, expected)
 }
 
+func (s *AdapterTestSuite) getPolicy(e *casbin.Enforcer) [][]string {
+	policy, err := e.GetPolicy()
+	s.Require().NoError(err)
+	return policy
+}
+
+func (s *AdapterTestSuite) getGroupingPolicy(e *casbin.Enforcer) [][]string {
+	policy, err := e.GetGroupingPolicy()
+	s.Require().NoError(err)
+	return policy
+}
+
 func (s *AdapterTestSuite) dropCasbinDB() {
 	opts, err := pg.ParseURL(os.Getenv("PG_CONN"))
 	s.Require().NoError(err)
@@ -58,7 +70,7 @@ func (s *AdapterTestSuite) TestSaveLoad() {
 	s.Assert().False(s.e.IsFiltered())
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
@@ -77,7 +89,7 @@ func (s *AdapterTestSuite) TestAutoSave() {
 	// This is still the original policy.
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	// Now we enable the AutoSave.
@@ -93,7 +105,7 @@ func (s *AdapterTestSuite) TestAutoSave() {
 	// The policy has a new rule: {"alice", "data1", "write"}.
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"alice", "data1", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	// Aditional AddPolicy have no effect
@@ -103,7 +115,7 @@ func (s *AdapterTestSuite) TestAutoSave() {
 	s.Require().NoError(err)
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"alice", "data1", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	_, err = s.e.AddPolicies([][]string{
@@ -131,7 +143,7 @@ func (s *AdapterTestSuite) TestAutoSave() {
 			{"bob", "data1", "write"},
 			{"bob", "data1", "read"},
 		},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	s.Require().NoError(err)
@@ -150,7 +162,7 @@ func (s *AdapterTestSuite) TestConstructorOptions() {
 
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
@@ -159,8 +171,8 @@ func (s *AdapterTestSuite) TestRemovePolicy() {
 	s.Require().NoError(err)
 
 	s.assertPolicy(
-		[][]string{{"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		[][]string{{"data2_admin", "data2", "write"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}},
+		s.getPolicy(s.e),
 	)
 
 	err = s.e.LoadPolicy()
@@ -168,7 +180,7 @@ func (s *AdapterTestSuite) TestRemovePolicy() {
 
 	s.assertPolicy(
 		[][]string{{"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	_, err = s.e.RemovePolicies([][]string{
@@ -179,7 +191,7 @@ func (s *AdapterTestSuite) TestRemovePolicy() {
 
 	s.assertPolicy(
 		[][]string{{"bob", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
@@ -189,7 +201,7 @@ func (s *AdapterTestSuite) TestRemoveFilteredPolicy() {
 
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	err = s.e.LoadPolicy()
@@ -197,7 +209,7 @@ func (s *AdapterTestSuite) TestRemoveFilteredPolicy() {
 
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
@@ -212,7 +224,7 @@ func (s *AdapterTestSuite) TestLoadFilteredPolicy() {
 	s.Assert().True(e.IsFiltered())
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"data2_admin", "data2", "read"}},
-		e.GetPolicy(),
+		s.getPolicy(e),
 	)
 }
 
@@ -225,7 +237,7 @@ func (s *AdapterTestSuite) TestLoadFilteredGroupingPolicy() {
 	})
 	s.Require().NoError(err)
 	s.Assert().True(e.IsFiltered())
-	s.assertPolicy([][]string{}, e.GetGroupingPolicy())
+	s.assertPolicy([][]string{}, s.getGroupingPolicy(e))
 
 	e, err = casbin.NewEnforcer("examples/rbac_model.conf", s.a)
 	s.Require().NoError(err)
@@ -235,7 +247,7 @@ func (s *AdapterTestSuite) TestLoadFilteredGroupingPolicy() {
 	})
 	s.Require().NoError(err)
 	s.Assert().True(e.IsFiltered())
-	s.assertPolicy([][]string{{"alice", "data2_admin"}}, e.GetGroupingPolicy())
+	s.assertPolicy([][]string{{"alice", "data2_admin"}}, s.getGroupingPolicy(e))
 }
 
 func (s *AdapterTestSuite) TestLoadFilteredPolicyNilFilter() {
@@ -248,20 +260,20 @@ func (s *AdapterTestSuite) TestLoadFilteredPolicyNilFilter() {
 	s.Assert().False(e.IsFiltered())
 	s.assertPolicy(
 		[][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
 func (s *AdapterTestSuite) TestSavePolicyClearPreviousData() {
 	s.e.EnableAutoSave(false)
-	policies := s.e.GetPolicy()
+	policies := s.getPolicy(s.e)
 	// clone slice to avoid shufling elements
 	policies = append(policies[:0:0], policies...)
 	for _, p := range policies {
 		_, err := s.e.RemovePolicy(p)
 		s.Require().NoError(err)
 	}
-	policies = s.e.GetGroupingPolicy()
+	policies = s.getGroupingPolicy(s.e)
 	policies = append(policies[:0:0], policies...)
 	for _, p := range policies {
 		_, err := s.e.RemoveGroupingPolicy(p)
@@ -269,7 +281,7 @@ func (s *AdapterTestSuite) TestSavePolicyClearPreviousData() {
 	}
 	s.assertPolicy(
 		[][]string{},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 
 	err := s.e.SavePolicy()
@@ -279,7 +291,7 @@ func (s *AdapterTestSuite) TestSavePolicyClearPreviousData() {
 	s.Require().NoError(err)
 	s.assertPolicy(
 		[][]string{},
-		s.e.GetPolicy(),
+		s.getPolicy(s.e),
 	)
 }
 
@@ -299,7 +311,7 @@ func (s *AdapterTestSuite) TestUpdatePolicy() {
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
 
-	s.assertPolicy(s.e.GetPolicy(), [][]string{{"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"bob", "data1", "read"}, {"alice", "data2", "write"}})
+	s.assertPolicy(s.getPolicy(s.e), [][]string{{"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"bob", "data1", "read"}, {"alice", "data2", "write"}})
 }
 
 func (s *AdapterTestSuite) TestUpdatePolicyWithLoadFilteredPolicy() {
@@ -315,13 +327,14 @@ func (s *AdapterTestSuite) TestUpdatePolicyWithLoadFilteredPolicy() {
 	err = s.e.LoadFilteredPolicy(&Filter{P: []string{"data2_admin"}})
 	s.Require().NoError(err)
 
-	_, err = s.e.UpdatePolicies(s.e.GetPolicy(), [][]string{{"bob", "data2", "read"}, {"alice", "data2", "write"}})
+	currentPolicy := s.getPolicy(s.e)
+	_, err = s.e.UpdatePolicies(currentPolicy, [][]string{{"bob", "data2", "read"}, {"alice", "data2", "write"}})
 	s.Require().NoError(err)
 
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
 
-	s.assertPolicy(s.e.GetPolicy(), [][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"bob", "data2", "read"}, {"alice", "data2", "write"}})
+	s.assertPolicy(s.getPolicy(s.e), [][]string{{"alice", "data1", "read"}, {"bob", "data2", "write"}, {"bob", "data2", "read"}, {"alice", "data2", "write"}})
 }
 
 func (s *AdapterTestSuite) TestUpdateFilteredPolicies() {
@@ -343,35 +356,35 @@ func (s *AdapterTestSuite) TestUpdateFilteredPolicies() {
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
 
-	s.assertPolicy(s.e.GetPolicy(), [][]string{{"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"alice", "data2", "write"}, {"bob", "data1", "read"}})
+	s.assertPolicy(s.getPolicy(s.e), [][]string{{"data2_admin", "data2", "read"}, {"data2_admin", "data2", "write"}, {"alice", "data2", "write"}, {"bob", "data1", "read"}})
 }
 
 func (s *AdapterTestSuite) TestEmptyStringSupport() {
 	// Test that empty strings in the middle of rules are properly stored and retrieved
 	// Note: Casbin trims trailing empty strings, so we focus on empty strings in the middle
 	var err error
-	
+
 	// Add policies with empty strings in the middle
 	_, err = s.e.AddPolicy("alice", "", "read")
 	s.Require().NoError(err)
-	
+
 	_, err = s.e.AddPolicy("bob", "", "write")
 	s.Require().NoError(err)
-	
+
 	// Reload to ensure they were saved correctly
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
-	
+
 	// Check that all policies including empty strings are present
-	policies := s.e.GetPolicy()
-	
+	policies := s.getPolicy(s.e)
+
 	// Should have original 4 policies plus 2 new ones with empty strings
 	s.Assert().Len(policies, 6)
-	
+
 	// Verify the new policies with empty strings exist
 	hasAliceEmpty := false
 	hasBobEmpty := false
-	
+
 	for _, p := range policies {
 		if len(p) == 3 && p[0] == "alice" && p[1] == "" && p[2] == "read" {
 			hasAliceEmpty = true
@@ -380,35 +393,35 @@ func (s *AdapterTestSuite) TestEmptyStringSupport() {
 			hasBobEmpty = true
 		}
 	}
-	
+
 	s.Assert().True(hasAliceEmpty, "Policy with alice and empty string in middle not found")
 	s.Assert().True(hasBobEmpty, "Policy with bob and empty string in middle not found")
-	
+
 	// Test removing a policy with empty string
 	_, err = s.e.RemovePolicy("alice", "", "read")
 	s.Require().NoError(err)
-	
+
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
-	
-	policies = s.e.GetPolicy()
+
+	policies = s.getPolicy(s.e)
 	s.Assert().Len(policies, 5)
-	
+
 	// Verify alice policy with empty string was removed
 	for _, p := range policies {
 		if len(p) == 3 && p[0] == "alice" && p[1] == "" && p[2] == "read" {
 			s.Fail("Policy with alice and empty string should have been removed")
 		}
 	}
-	
+
 	// Test updating a policy with empty string
 	_, err = s.e.UpdatePolicy([]string{"bob", "", "write"}, []string{"bob", "", "read"})
 	s.Require().NoError(err)
-	
+
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
-	
-	policies = s.e.GetPolicy()
+
+	policies = s.getPolicy(s.e)
 	hasBobEmptyRead := false
 	for _, p := range policies {
 		if len(p) == 3 && p[0] == "bob" && p[1] == "" && p[2] == "read" {
@@ -425,24 +438,24 @@ func (s *AdapterTestSuite) TestEmptyStringSupport() {
 func (s *AdapterTestSuite) TestEmptyStringVsWildcard() {
 	// Test that empty strings in rules are different from wildcards in filters
 	var err error
-	
+
 	// Add a policy with an empty string
 	_, err = s.e.AddPolicy("user1", "", "write")
 	s.Require().NoError(err)
-	
+
 	// Add a policy with a non-empty value
 	_, err = s.e.AddPolicy("user1", "resource1", "write")
 	s.Require().NoError(err)
-	
+
 	// Reload
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
-	
+
 	// Both should exist
-	policies := s.e.GetPolicy()
+	policies := s.getPolicy(s.e)
 	hasEmpty := false
 	hasNonEmpty := false
-	
+
 	for _, p := range policies {
 		if len(p) >= 3 && p[0] == "user1" && p[2] == "write" {
 			if p[1] == "" {
@@ -452,18 +465,18 @@ func (s *AdapterTestSuite) TestEmptyStringVsWildcard() {
 			}
 		}
 	}
-	
+
 	s.Assert().True(hasEmpty, "Policy with empty string should exist")
 	s.Assert().True(hasNonEmpty, "Policy with resource1 should exist")
-	
+
 	// Remove using wildcard (empty string in filter) should remove both
 	_, err = s.e.RemoveFilteredPolicy(0, "user1", "", "write")
 	s.Require().NoError(err)
-	
+
 	err = s.e.LoadPolicy()
 	s.Require().NoError(err)
-	
-	policies = s.e.GetPolicy()
+
+	policies = s.getPolicy(s.e)
 	for _, p := range policies {
 		if len(p) >= 3 && p[0] == "user1" && p[2] == "write" {
 			s.Fail("Policies with user1 and write should have been removed by wildcard filter")
