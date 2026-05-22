@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/util"
+	"github.com/casbin/casbin/v3"
+	"github.com/casbin/casbin/v3/util"
 	"github.com/go-pg/pg/v10"
 	"github.com/stretchr/testify/suite"
 )

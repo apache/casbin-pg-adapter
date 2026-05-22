@@ -2,7 +2,7 @@ package main
 
 import (
 	pgadapter "github.com/casbin/casbin-pg-adapter"
-	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v3"
 )
 
 func main() {
