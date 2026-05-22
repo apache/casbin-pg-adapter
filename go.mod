@@ -1,10 +1,10 @@
 module github.com/casbin/casbin-pg-adapter
 
-go 1.18
+go 1.23.0
 
 require (
 	github.com/casbin/casbin/v3 v3.10.0
-	github.com/go-pg/pg/v10 v10.12.0
+	github.com/go-pg/pg/v10 v10.15.0
 	github.com/mmcloughlin/meow v0.0.0-20181112033425-871e50784daf
 	github.com/stretchr/testify v1.7.0
 )
@@ -22,8 +22,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
