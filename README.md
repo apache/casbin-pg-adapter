@@ -1,13 +1,13 @@
 # Go-pg Adapter
 
-[![Go](https://github.com/casbin/casbin-pg-adapter/actions/workflows/ci.yml/badge.svg)](https://github.com/casbin/casbin-pg-adapter/actions/workflows/ci.yml)
+[![Go](https://github.com/apache/casbin-pg-adapter/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/casbin-pg-adapter/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/casbin/casbin-pg-adapter/badge.svg?branch=master)](https://coveralls.io/github/casbin/casbin-pg-adapter?branch=master)
 
 Go-pg Adapter is the [Go-pg](https://github.com/go-pg/pg) adapter for [Casbin](https://github.com/casbin/casbin). With this library, Casbin can load policy from PostgreSQL or save policy to it.
 
 ## Installation
 
-    go get github.com/casbin/casbin-pg-adapter
+    go get github.com/apache/casbin-pg-adapter
 
 ## Simple Postgres Example
 
@@ -15,7 +15,7 @@ Go-pg Adapter is the [Go-pg](https://github.com/go-pg/pg) adapter for [Casbin](h
 package main
 
 import (
-	pgadapter "github.com/casbin/casbin-pg-adapter"
+	pgadapter "github.com/apache/casbin-pg-adapter"
 	"github.com/casbin/casbin/v2"
 )
 
@@ -63,7 +63,7 @@ package main
 
 import (
 	"github.com/casbin/casbin/v2"
-	pgadapter "github.com/casbin/casbin-pg-adapter"
+	pgadapter "github.com/apache/casbin-pg-adapter"
 )
 
 func main() {
@@ -87,7 +87,7 @@ package main
 
 import (
 	"github.com/casbin/casbin/v2"
-	pgadapter "github.com/casbin/casbin-pg-adapter"
+	pgadapter "github.com/apache/casbin-pg-adapter"
 	"github.com/go-pg/pg/v9"
 )
 
@@ -109,7 +109,7 @@ func main() {
 
 ## Debug tests
 
-    docker-compose run --rm go dlv test github.com/casbin/casbin-pg-adapter
+    docker-compose run --rm go dlv test github.com/apache/casbin-pg-adapter
 
 ## Getting Help
 

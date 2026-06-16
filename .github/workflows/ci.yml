@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/checkout@v2
       - name: Run semantic-release
-        if: github.repository == 'casbin/casbin-pg-adapter' && github.event_name == 'push'
+        if: github.repository == 'apache/casbin-pg-adapter' && github.event_name == 'push'
         run: |
           npm install --save-dev semantic-release@17.2.4
           npx semantic-release
