@@ -2,6 +2,11 @@
 
 [![Go](https://github.com/apache/casbin-pg-adapter/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/casbin-pg-adapter/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/casbin/casbin-pg-adapter/badge.svg?branch=master)](https://coveralls.io/github/casbin/casbin-pg-adapter?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/apache/casbin-pg-adapter)](https://goreportcard.com/report/github.com/apache/casbin-pg-adapter)
+[![Go Reference](https://pkg.go.dev/badge/github.com/apache/casbin-pg-adapter.svg)](https://pkg.go.dev/github.com/apache/casbin-pg-adapter)
+[![Release](https://img.shields.io/github/release/apache/casbin-pg-adapter.svg)](https://github.com/apache/casbin-pg-adapter/releases/latest)
+[![Discord](https://img.shields.io/discord/1022748306096537660?logo=discord&label=discord&color=5865F2)](https://discord.gg/S5UjpzGZjN)
+[![Sourcegraph](https://sourcegraph.com/github.com/apache/casbin-pg-adapter/-/badge.svg)](https://sourcegraph.com/github.com/apache/casbin-pg-adapter?badge)
 
 Go-pg Adapter is the [Go-pg](https://github.com/go-pg/pg) adapter for [Casbin](https://github.com/casbin/casbin). With this library, Casbin can load policy from PostgreSQL or save policy to it.
 
